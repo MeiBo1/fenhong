@@ -84,7 +84,7 @@
       </div>
 
       <div class="note">
-        公式：<span class="mono">分红利润 = A股盈利 − 35029.41 + ((H股当前资产 − 初始总资产) × 比例系数 × 本金 ÷ (本金 + 160000)) × 分红比例 × 分红比例</span><br>
+        公式：<span class="mono">分红利润 = ((A股盈利 − 35029.41) + ((H股当前资产 − 初始总资产) × 比例系数 × 本金 ÷ (本金 + 160000))) × 分红比例</span><br>
         初始总资产：<span class="mono">初始总资产 = 本金 + 160000</span><br>
         折合年化：<span class="mono">年化% = 分红利润 ÷ 100000 × 100%</span>
       </div>
@@ -168,8 +168,8 @@
       state.a = a; state.h = h; persist();
 
       const initialAsset = state.principal + 160000;
-      const hProfit = ((h - initialAsset) * state.fx * state.principal / (state.principal + 160000)) * state.rate;
-      const dividend = (a - 35029.41 + hProfit) * state.rate;
+      const hProfit = (h - initialAsset) * state.fx * state.principal / (state.principal + 160000);
+      const dividend = ((a - 35029.41) + hProfit) * state.rate;
       const annual = (dividend / defaults.investBase) * 100;
 
       $('dividend').textContent = fmtCNY(dividend);
