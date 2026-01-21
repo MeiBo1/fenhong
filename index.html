@@ -53,7 +53,7 @@
           <input id="a" type="number" inputmode="decimal" step="0.01" placeholder="例如 500000">
         </div>
         <div>
-          <label>当前 H 股盈利（元）</label>
+          <label>当前 H 股总资产（元）</label>
           <input id="h" type="number" inputmode="decimal" step="0.01" placeholder="例如 240000">
         </div>
       </div>
@@ -84,7 +84,8 @@
       </div>
 
       <div class="note">
-        公式：<span class="mono">分红利润 = (A股盈利 − 35029.41 + H股盈利 × 比例系数 ÷ 3) × 40%</span><br>
+        公式：<span class="mono">分红利润 = A股盈利 − 35029.41 + ((H股当前资产 − 初始总资产) × 比例系数 × 本金 ÷ (本金 + 160000)) × 分红比例 × 分红比例</span><br>
+        初始总资产：<span class="mono">初始总资产 = 本金 + 160000</span><br>
         折合年化：<span class="mono">年化% = 分红利润 ÷ 100000 × 100%</span>
       </div>
 
@@ -110,6 +111,16 @@
           <input id="rateInput" type="number" inputmode="decimal" step="0.01" placeholder="40">
         </div>
       </div>
+      <div class="grid cols-2" style="margin-top:12px">
+        <div>
+          <label>本金（元）</label>
+          <input id="principalInput" type="number" inputmode="decimal" step="1" placeholder="100000">
+        </div>
+        <div class="stat" style="padding:8px 12px">
+          <div class="k">初始总资产</div>
+          <div class="v" style="font-size:16px" id="initAsset">¥260,000</div>
+        </div>
+      </div>
       <div class="row" style="margin-top:14px">
         <button value="cancel" class="ghost">取消</button>
         <button id="saveCfg" value="ok" class="primary">保存</button>
@@ -119,7 +130,7 @@
 
   <script>
     // Defaults
-    const defaults = { fx: 0.91633, rate: 0.40, investBase: 100000 };
+    const defaults = { fx: 0.91633, rate: 0.40, investBase: 100000, principal: 100000 };
     // DOM helpers
     const $ = (id) => document.getElementById(id);
     const toNumber = (v) => { const n = parseFloat(String(v || '').replace(/,/g, '')); return Number.isFinite(n) ? n : 0; };
@@ -132,6 +143,7 @@
       h: 0,
       fx: defaults.fx,
       rate: defaults.rate,
+      principal: defaults.principal,
     };
 
     // Load from localStorage
@@ -147,7 +159,7 @@
     $('rate').textContent = (state.rate * 100).toLocaleString('zh-CN', { maximumFractionDigits: 2 });
 
     function persist(){
-      localStorage.setItem('ah-calc', JSON.stringify({ a:$('a').value, h:$('h').value, fx:state.fx, rate:state.rate }));
+      localStorage.setItem('ah-calc', JSON.stringify({ a:$('a').value, h:$('h').value, fx:state.fx, rate:state.rate, principal:state.principal }));
     }
 
     function recalc(){
@@ -155,7 +167,9 @@
       const h = toNumber($('h').value);
       state.a = a; state.h = h; persist();
 
-      const dividend = (a - 35029.41 + (h * state.fx) / 3) * state.rate;
+      const initialAsset = state.principal + 160000;
+      const hProfit = ((h - initialAsset) * state.fx * state.principal / (state.principal + 160000)) * state.rate;
+      const dividend = (a - 35029.41 + hProfit) * state.rate;
       const annual = (dividend / defaults.investBase) * 100;
 
       $('dividend').textContent = fmtCNY(dividend);
@@ -177,18 +191,30 @@
     $('fill').addEventListener('click', () => { $('a').value='500000'; $('h').value='240000'; recalc(); });
 
     // Settings dialog
-    const dlg = $('dlg'); const fxInput = $('fxInput'); const rateInput = $('rateInput');
+    const dlg = $('dlg'); const fxInput = $('fxInput'); const rateInput = $('rateInput'); const principalInput = $('principalInput');
     $('edit').addEventListener('click', () => {
       fxInput.value = state.fx.toFixed(5);
       rateInput.value = (state.rate * 100).toFixed(2);
+      principalInput.value = state.principal.toFixed(0);
+      updateInitAsset();
       dlg.showModal();
     });
+    
+    function updateInitAsset() {
+      const p = toNumber(principalInput.value) || state.principal;
+      $('initAsset').textContent = fmtCNY(p + 160000);
+    }
+    
+    principalInput.addEventListener('input', updateInitAsset);
+    
     $('saveCfg').addEventListener('click', (e) => {
       e.preventDefault();
       const newFx = toNumber(fxInput.value);
       const newRatePct = toNumber(rateInput.value);
+      const newPrincipal = toNumber(principalInput.value);
       if (newFx > 0) { state.fx = newFx; $('fx').textContent = state.fx.toFixed(5); }
       if (newRatePct > 0) { state.rate = newRatePct / 100; $('rate').textContent = (state.rate*100).toFixed(2); }
+      if (newPrincipal > 0) { state.principal = newPrincipal; }
       persist();
       dlg.close('ok'); recalc();
     });
