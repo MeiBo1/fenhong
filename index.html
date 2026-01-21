@@ -61,11 +61,11 @@
       <div class="grid cols-4" style="margin-top:12px">
         <div class="stat">
           <div class="k">港币换算系数</div>
-          <div class="v"><span class="mono">1 人民币 = <span id="fx">0.91633</span> 港币</span></div>
+          <div class="v"><span class="mono">1 人民币 = <span id="fx">0.89265</span> 港币</span></div>
         </div>
         <div class="stat">
           <div class="k">分红比例</div>
-          <div class="v"><span id="rate">40</span>%</div>
+          <div class="v"><span id="rate">43</span>%</div>
         </div>
         <div class="stat">
           <div class="k">分红利润</div>
@@ -104,17 +104,17 @@
       <div class="grid cols-2">
         <div>
           <label>比例系数（1 人民币 = ? 港币）</label>
-          <input id="fxInput" type="number" inputmode="decimal" step="0.00001" placeholder="0.91633">
+          <input id="fxInput" type="number" inputmode="decimal" step="0.00001" placeholder="0.89265">
         </div>
         <div>
           <label>分红比例（%）</label>
-          <input id="rateInput" type="number" inputmode="decimal" step="0.01" placeholder="40">
+          <input id="rateInput" type="number" inputmode="decimal" step="0.01" placeholder="43">
         </div>
       </div>
       <div class="grid cols-2" style="margin-top:12px">
         <div>
           <label>本金（元）</label>
-          <input id="principalInput" type="number" inputmode="decimal" step="1" placeholder="100000">
+          <input id="principalInput" type="number" inputmode="decimal" step="1" placeholder="132352">
         </div>
         <div class="stat" style="padding:8px 12px">
           <div class="k">初始总资产</div>
@@ -130,7 +130,7 @@
 
   <script>
     // Defaults
-    const defaults = { fx: 0.91633, rate: 0.40, investBase: 100000, principal: 100000 };
+    const defaults = { fx: 0.89265, rate: 0.43, investBase: 100000, principal: 132352 };
     // DOM helpers
     const $ = (id) => document.getElementById(id);
     const toNumber = (v) => { const n = parseFloat(String(v || '').replace(/,/g, '')); return Number.isFinite(n) ? n : 0; };
